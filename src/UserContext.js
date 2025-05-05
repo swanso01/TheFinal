@@ -4,7 +4,7 @@ export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState({
-    selectedItems: [], 
+    selectedItems: [],
   });
 
   const [services, setServices] = useState([
@@ -13,8 +13,18 @@ export const UserProvider = ({ children }) => {
     { name: 'Packages', maxQuantity: 0 },
   ]);
 
+  const updateUser = (newUserData) => {
+    setUser((prev) => ({
+      ...prev,
+      ...newUserData,
+      selectedItems: newUserData.selectedItems !== undefined
+        ? newUserData.selectedItems
+        : prev.selectedItems,
+    }));
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, services, setServices }}>
+    <UserContext.Provider value={{ user, setUser: updateUser, services, setServices }}>
       {children}
     </UserContext.Provider>
   );

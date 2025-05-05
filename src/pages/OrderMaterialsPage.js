@@ -21,39 +21,41 @@ function OrderMaterialsPage() {
   const handleSelectItem = (item) => {
     if (!user) {
       console.error('User is undefined');
+      alert('Please log in to add items to the cart.');
       return;
     }
 
     const quantityToAdd = item.name === 'Labor' ? 1 : quantities[item.name] || 1;
+    console.log('Adding item:', item.name, 'Quantity:', quantityToAdd);
+
     if (item.maxQuantity !== 0 && quantityToAdd > item.maxQuantity && item.name !== 'Labor') {
       alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
       return;
     }
 
-    setUser((prevUser) => {
-      const updatedCart = [...(prevUser.selectedItems || [])];
-      const existingItemIndex = updatedCart.findIndex((cartItem) => cartItem.name === item.name);
-
-      if (existingItemIndex > -1) {
-        const updatedQuantity = updatedCart[existingItemIndex].quantity + quantityToAdd;
-        if (item.maxQuantity === 0 || updatedQuantity <= item.maxQuantity || item.name === 'Labor') {
-          updatedCart[existingItemIndex] = { ...updatedCart[existingItemIndex], quantity: updatedQuantity };
-
-        } else {
-          alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
-          return prevUser;
+    setUser({
+      ...user,
+      selectedItems: [...(user.selectedItems || [])].reduce((acc, curr) => {
+        if (curr.name === item.name) {
+          const newQuantity = curr.quantity + quantityToAdd;
+          if (item.maxQuantity === 0 || newQuantity <= item.maxQuantity || item.name === 'Labor') {
+            return [...acc, { ...curr, quantity: newQuantity }];
+          } else {
+            alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
+            return acc;
+          }
         }
-      } else {
-        updatedCart.push({ name: item.name, quantity: quantityToAdd });
-        
-      }
-
-      return { ...prevUser, selectedItems: updatedCart };
+        return [...acc, curr];
+      }, []).concat(
+        user.selectedItems && user.selectedItems.some((i) => i.name === item.name)
+          ? []
+          : [{ name: item.name, quantity: quantityToAdd }]
+      ),
     });
   };
 
-  const laborService = services.find(service => service.name === 'Labor');
-  const otherServices = services.filter(service => service.name !== 'Labor');
+  const laborService = services.find((service) => service.name === 'Labor');
+  const otherServices = services.filter((service) => service.name !== 'Labor');
 
   return (
     <div className="App-order-materials">

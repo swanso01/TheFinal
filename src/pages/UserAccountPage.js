@@ -1,4 +1,4 @@
-// UserAccountPage.js
+
 import React, { useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { Navigate } from 'react-router-dom';

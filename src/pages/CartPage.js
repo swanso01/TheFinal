@@ -1,4 +1,3 @@
-// CartPage.js
 import React, { useContext } from 'react';
 import { UserContext } from '../UserContext';
 import '../App.css';
@@ -11,16 +10,24 @@ function CartPage() {
   }
 
   const handleRemoveItem = (itemName) => {
-    setUser((prev) => ({
-      ...prev,
-      selectedItems: prev.selectedItems
-        .map((item) =>
-          item.name === itemName
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0),
-    }));
+    if (!user) {
+      console.error('User is undefined');
+      return;
+    }
+
+    setUser({
+      ...user,
+      selectedItems: user.selectedItems.reduce((acc, curr) => {
+        if (curr.name === itemName) {
+          const newQuantity = curr.quantity - 1;
+          if (newQuantity > 0) {
+            return [...acc, { ...curr, quantity: newQuantity }];
+          }
+          return acc;
+        }
+        return [...acc, curr];
+      }, []),
+    });
   };
 
   return (

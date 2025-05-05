@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { UserContext } from './UserContext';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import OrderMaterialsPage from './pages/OrderMaterialsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -18,11 +18,17 @@ function AppRouter() {
       <Route path="/" element={<HomePage />} />
       <Route
         path="/order"
-        element={user && user.email ? <OrderMaterialsPage /> : <Navigate to="/login" />} // Redirect to login if not signed in
+        element={user && user.email ? <OrderMaterialsPage /> : <Navigate to="/login" />}
       />
       <Route
         path="/account"
-        element={user && user.email ? <UserAccountPage /> : <Navigate to="/login" />} // Redirect to login if not signed in
+        element={
+          user && user.email ? (
+            user.isAdmin ? <AdminDashboardPage /> : <UserAccountPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
       />
       <Route path="/admin" element={<AdminDashboardPage />} />
       <Route path="/login" element={<LoginPage />} />

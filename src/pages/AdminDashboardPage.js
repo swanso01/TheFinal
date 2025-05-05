@@ -1,4 +1,4 @@
-// AdminDashboardPage.js
+
 import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../UserContext';
 import { saveToLocalStorage, loadFromLocalStorage, removeFromLocalStorage } from '../utils/localStorage';
@@ -6,7 +6,7 @@ import '../App.css';
 
 function AdminDashboardPage() {
   const { services, setServices } = useContext(UserContext);
-  const { user } = useContext(UserContext); // Get user from context
+  const { user } = useContext(UserContext); 
   const [newService, setNewService] = useState('');
   const [maxQuantity, setMaxQuantity] = useState(0);
 
@@ -31,7 +31,7 @@ function AdminDashboardPage() {
 
   const handleLogout = () => {
     removeFromLocalStorage('isAdminLoggedIn');
-    window.location.href = '/'; // Force a full page reload to clear context
+    window.location.href = '/';
   };
 
   const handleAddService = () => {
@@ -48,7 +48,7 @@ function AdminDashboardPage() {
     setServices(services.filter((service) => service.name !== serviceName));
   };
 
-  // Only show the admin dashboard if the user is logged in and is an admin
+
   if (!user || !user.isAdmin) {
     return (
       <div style={{ textAlign: 'center', marginTop: '50px' }}>

@@ -24,15 +24,20 @@ function OrderMaterialsPage() {
       alert('Please log in to add items to the cart.');
       return;
     }
-
+  
     const quantityToAdd = item.name === 'Labor' ? 1 : quantities[item.name] || 1;
-    console.log('Adding item:', item.name, 'Quantity:', quantityToAdd);
-
+  
+    // Check if "Labor" is already in the cart
+    if (item.name === 'Labor' && user.selectedItems.some((i) => i.name === 'Labor')) {
+      alert('You can only add 1 Labor to the cart.');
+      return;
+    }
+  
     if (item.maxQuantity !== 0 && quantityToAdd > item.maxQuantity && item.name !== 'Labor') {
       alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
       return;
     }
-
+  
     setUser({
       ...user,
       selectedItems: [...(user.selectedItems || [])].reduce((acc, curr) => {

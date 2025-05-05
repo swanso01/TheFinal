@@ -1,44 +1,49 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import { UserContext } from '../UserContext';
-import { saveToLocalStorage, loadFromLocalStorage, removeFromLocalStorage } from '../utils/localStorage';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import '../App.css';
 
 function AdminDashboardPage() {
   const { services, setServices } = useContext(UserContext);
-  const { user } = useContext(UserContext); 
+  const { user } = useContext(UserContext);
   const [newService, setNewService] = useState('');
   const [maxQuantity, setMaxQuantity] = useState(0);
 
-  const defaultServices = [
-    { name: 'Materials', maxQuantity: 0 },
-    { name: 'Labor', maxQuantity: 1 },
-    { name: 'Packages', maxQuantity: 0 },
-  ];
-
   useEffect(() => {
-    const savedServices = loadFromLocalStorage('services', []);
-    if (Array.isArray(savedServices) && savedServices.length > 0) {
-      setServices(savedServices.filter((service) => service.name && service.name.trim() !== ''));
-    } else {
-      setServices(defaultServices);
-    }
+    const fetchServices = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'services'));
+        const fetchedServices = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setServices(fetchedServices);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      }
+    };
+
+    fetchServices();
   }, [setServices]);
 
-  useEffect(() => {
-    saveToLocalStorage('services', services);
-  }, [services]);
-
-  const handleLogout = () => {
-    removeFromLocalStorage('isAdminLoggedIn');
-    window.location.href = '/';
-  };
-
-  const handleAddService = () => {
+  const handleAddService = async () => {
     if (newService.trim() !== '') {
-      setServices([...services, { name: newService.trim(), maxQuantity: parseInt(maxQuantity) || 0 }]);
-      setNewService('');
-      setMaxQuantity(0);
+      const service = { name: newService.trim(), maxQuantity: parseInt(maxQuantity) || 0 };
+
+      try {
+
+        await addDoc(collection(db, 'services'), service);
+
+
+        setServices([...services, service]);
+        setNewService('');
+        setMaxQuantity(0);
+        alert('Service added successfully!');
+      } catch (error) {
+        console.error('Error adding service:', error);
+        alert('An error occurred while adding the service. Please try again.');
+      }
     } else {
       alert('Service name cannot be blank!');
     }
@@ -47,7 +52,6 @@ function AdminDashboardPage() {
   const handleRemoveService = (serviceName) => {
     setServices(services.filter((service) => service.name !== serviceName));
   };
-
 
   if (!user || !user.isAdmin) {
     return (
@@ -62,9 +66,6 @@ function AdminDashboardPage() {
   return (
     <div className="App-admin-dashboard">
       <h2>Admin Dashboard</h2>
-      <button onClick={handleLogout} className="App-logout-button">
-        Logout
-      </button>
       <div className="App-admin-input">
         <input
           type="text"

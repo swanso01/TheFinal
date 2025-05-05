@@ -1,6 +1,8 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth, db } from '../firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import '../App.css';
 
 function SignupPage() {
@@ -8,24 +10,29 @@ function SignupPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
-    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    const userExists = existingUsers.some((user) => user.email === email);
-    if (userExists) {
-      alert('User already exists. Please log in.');
-      return;
+
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        email,
+        uid: userCredential.user.uid,
+        orders: [],
+      });
+
+      alert('Signup successful!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error during signup:', error.message);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('This email is already in use. Please log in instead.');
+      } else {
+        alert(`An error occurred during signup: ${error.message}`);
+      }
     }
-
-    const newUser = { email, password, orders: [] };
-    existingUsers.push(newUser);
-
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-
-    alert('Signup successful!');
-    navigate('/');
   };
 
   return (

@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
 import { UserContext } from '../UserContext';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase';
 import '../App.css';
 
 function CartPage() {
@@ -30,7 +32,7 @@ function CartPage() {
     });
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!user) {
       console.error('User is undefined');
       alert('Please log in to place an order.');
@@ -45,15 +47,31 @@ function CartPage() {
     const order = {
       items: user.selectedItems,
       timestamp: new Date().toLocaleString(),
+      email: user.email,
     };
 
-    setUser({
-      ...user,
-      orders: [...(user.orders || []), order],
-      selectedItems: [],
-    });
+    try {
+     
+      const orderRef = await addDoc(collection(db, 'orders'), order);
 
-    alert('Order placed successfully!');
+      
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        orders: [...(user.orders || []), { id: orderRef.id, ...order }],
+      });
+
+
+      setUser({
+        ...user,
+        selectedItems: [],
+        orders: [...(user.orders || []), { id: orderRef.id, ...order }],
+      });
+
+      alert('Order placed successfully!');
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('An error occurred while placing the order. Please try again.');
+    }
   };
 
   return (

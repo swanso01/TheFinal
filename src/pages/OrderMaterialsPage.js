@@ -20,30 +20,18 @@ function OrderMaterialsPage() {
 
   const handleSelectItem = (item) => {
     if (!user) {
-      console.error('User is undefined');
       alert('Please log in to add items to the cart.');
       return;
     }
-  
-    const quantityToAdd = item.name === 'Labor' ? 1 : quantities[item.name] || 1;
-  
-    // Check if "Labor" is already in the cart
-    if (item.name === 'Labor' && user.selectedItems.some((i) => i.name === 'Labor')) {
-      alert('You can only add 1 Labor to the cart.');
-      return;
-    }
-  
-    if (item.maxQuantity !== 0 && quantityToAdd > item.maxQuantity && item.name !== 'Labor') {
-      alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
-      return;
-    }
-  
+
+    const quantityToAdd = quantities[item.name] || 1;
+
     setUser({
       ...user,
       selectedItems: [...(user.selectedItems || [])].reduce((acc, curr) => {
         if (curr.name === item.name) {
           const newQuantity = curr.quantity + quantityToAdd;
-          if (item.maxQuantity === 0 || newQuantity <= item.maxQuantity || item.name === 'Labor') {
+          if (item.maxQuantity === 0 || newQuantity <= item.maxQuantity) {
             return [...acc, { ...curr, quantity: newQuantity }];
           } else {
             alert(`You cannot order more than ${item.maxQuantity} of ${item.name}`);
@@ -59,26 +47,11 @@ function OrderMaterialsPage() {
     });
   };
 
-  const laborService = services.find((service) => service.name === 'Labor');
-  const otherServices = services.filter((service) => service.name !== 'Labor');
-
   return (
     <div className="App-order-materials">
       <h2>Order Materials</h2>
-
-      <div className="App-order-labor">
-        {laborService && (
-          <div className="App-order-item">
-            <span>{laborService.name}</span>
-            <button className="App-order-button" onClick={() => handleSelectItem(laborService)}>
-              Add to Cart
-            </button>
-          </div>
-        )}
-      </div>
-
       <div className="App-order-list">
-        {otherServices.map((service, index) => (
+        {services.map((service, index) => (
           <div key={index} className="App-order-item">
             <span>{service.name}</span>
             <input

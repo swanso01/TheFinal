@@ -30,6 +30,32 @@ function CartPage() {
     });
   };
 
+  const handlePlaceOrder = () => {
+    if (!user) {
+      console.error('User is undefined');
+      alert('Please log in to place an order.');
+      return;
+    }
+
+    if (!user.selectedItems || user.selectedItems.length === 0) {
+      alert('Cart is empty!');
+      return;
+    }
+
+    const order = {
+      items: user.selectedItems,
+      timestamp: new Date().toLocaleString(),
+    };
+
+    setUser({
+      ...user,
+      orders: [...(user.orders || []), order],
+      selectedItems: [],
+    });
+
+    alert('Order placed successfully!');
+  };
+
   return (
     <div className="App-cart">
       <h2>Your Cart</h2>
@@ -49,6 +75,9 @@ function CartPage() {
           </li>
         ))}
       </ul>
+      <button className="App-cart-order-button" onClick={handlePlaceOrder}>
+        Place Order
+      </button>
     </div>
   );
 }

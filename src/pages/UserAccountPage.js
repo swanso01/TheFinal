@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { Navigate } from 'react-router-dom';
@@ -17,10 +16,19 @@ function UserAccountPage() {
       <p><strong>Username:</strong> {user.name}</p>
 
       <h3>Order History:</h3>
-      {user.orders.length > 0 ? (
+      {user.orders && user.orders.length > 0 ? (
         <ul>
           {user.orders.map((order, index) => (
-            <li key={index}>{order}</li>
+            <li key={index}>
+              <strong>Order placed on {order.timestamp}</strong>
+              <ul>
+                {order.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>
+                    {item.name}: {item.quantity}
+                  </li>
+                ))}
+              </ul>
+            </li>
           ))}
         </ul>
       ) : (

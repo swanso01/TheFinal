@@ -4,12 +4,16 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 
+// Create user context
 export const UserContext = createContext();
 
+// Provide user data to app
 export const UserProvider = ({ children }) => {
+  // State for user and services
   const [user, setUser] = useState(null);
   const [services, setServices] = useState([]);
 
+  // Fetch services from Firestore
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -23,10 +27,10 @@ export const UserProvider = ({ children }) => {
         console.error('Error fetching services:', error);
       }
     };
-
     fetchServices();
   }, []);
 
+  // Check user login state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -39,10 +43,10 @@ export const UserProvider = ({ children }) => {
         setUser(null);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
+  // Provide user and services to app
   return (
     <UserContext.Provider value={{ user, setUser, services, setServices }}>
       {children}
